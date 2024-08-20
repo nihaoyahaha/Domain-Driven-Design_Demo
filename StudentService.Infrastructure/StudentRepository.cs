@@ -1,3 +1,4 @@
+using Commons.CustomException;
 using Microsoft.EntityFrameworkCore;
 using StudentService.Domain;
 using StudentService.Domain.Entities;
@@ -25,8 +26,10 @@ public class StudentRepository : IStudentRepository
 
     public async Task<List<Student>> FindBySectionAsync(string sectionName, string gradeName)
     {
-        Grade grade = await FindGradeByNameAsync(gradeName);
-        Section section = await FindSectionByNameAsync(sectionName,grade.GradeId);
+        Grade? grade = await FindGradeByNameAsync(gradeName);
+        if (grade == null) throw new GradeNotFoundException($"不存在{gradeName}!");
+        Section? section = await FindSectionByNameAsync(sectionName,grade.GradeId);
+        if (section == null) throw new SectionNotFoundException($"{gradeName}{sectionName}不存在!");
         return section.Students;
     }
 
@@ -47,19 +50,20 @@ public class StudentRepository : IStudentRepository
 
     public async Task<bool> IsExistStudent(string studentID, string sectionName, string gradeName)
     {
-        Grade grade = await FindGradeByNameAsync(gradeName);
-        Section section = await FindSectionByNameAsync(sectionName,grade.GradeId);
+        Grade? grade = await FindGradeByNameAsync(gradeName);
+        if (grade == null) throw new GradeNotFoundException($"{gradeName}不存在!");
+        Section? section = await FindSectionByNameAsync(sectionName,grade.GradeId);
+        if (section == null) throw new SectionNotFoundException("{gradeName}{sectionName}不存在!");
         return await _dbCtx.students.AnyAsync( x => x.StudentId == studentID && x.SectionId == section.SectionId && x.Grade ==grade) ;
     }
 
     public async Task RemoveStudentAsync(string studentId)
     {
-        Student student =await FindByStudentIdAsync(studentId);
+        Student? student =await FindByStudentIdAsync(studentId);
         if(student !=null)
         {
             _dbCtx.students.Remove(student);     
-        }
-        
+        }    
     }
 
 }

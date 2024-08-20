@@ -39,10 +39,7 @@ public class Grade
     /// <param name="section"></param>
     public void AddSection(Section section)
     {
-        if (!Sections.Contains(section))
-        {
-            Sections.Add(section);
-        }
+        Sections.Add(section); 
     }
 
     /// <summary>

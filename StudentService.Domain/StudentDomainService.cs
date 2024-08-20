@@ -1,3 +1,4 @@
+using Commons.CustomException;
 using StudentService.Domain.Entities;
 
 namespace StudentService.Domain;
@@ -43,7 +44,9 @@ public class StudentDomainService
     public async Task SetionAddStudentAsync(AddStudentReq req)
     {
         Grade? grade = await _repository.FindGradeByNameAsync(req.GradeName);
+        if (grade == null) throw new GradeNotFoundException($"年级:{req.GradeName}不存在!");
         Section? section = await _repository.FindSectionByNameAsync(req.SectionName, grade.GradeId);
+        if(section == null)  throw new SectionNotFoundException($"不存在{req.GradeName}{req.SectionName}!");
         Student student = new Student(req.StudentName, req.Birthday, section, grade);
         section.AddStudent(student);
     }
@@ -69,9 +72,12 @@ public class StudentDomainService
     /// <returns></returns>
     public async Task StudentChangeSectionAsync(ChangeSectionReq req)
     {
-        Student student = await FindStudentByIdAsync(req.StudentId);
-        Grade grade = await FindGradeByNameAsync(req.GradeName);
-        Section section = grade.FindSectionByName(req.SectionName);
+        Student? student = await FindStudentByIdAsync(req.StudentId);
+        if (student == null) throw new StudentNotFoundException($"找不到学号为:{req.StudentId}的学生!");
+        Grade? grade = await FindGradeByNameAsync(req.GradeName);
+        if(grade == null) throw new GradeNotFoundException($"{req.GradeName}不存在!");
+        Section? section = grade.FindSectionByName(req.SectionName);
+        if (section == null) throw new SectionNotFoundException($"{req.GradeName}{req.SectionName}不存在!");
         student.ChangeSection(section);
     }
 
@@ -83,9 +89,12 @@ public class StudentDomainService
     /// <returns></returns>
     public async Task StudentUpGrade(string studentId, string sectionName, string gradeName)
     {
-        Student student = await FindStudentByIdAsync(studentId);
-        Grade grade = await FindGradeByNameAsync(gradeName);
-        Section section = grade.FindSectionByName(sectionName);
+        Student? student = await FindStudentByIdAsync(studentId);
+        if (student == null) throw new StudentNotFoundException($"找不到学号为:{studentId}的学生!");
+        Grade? grade = await FindGradeByNameAsync(gradeName);
+        if(grade == null) throw new GradeNotFoundException($"{gradeName}不存在!");
+        Section? section = grade.FindSectionByName(sectionName);
+        if (section == null) throw new SectionNotFoundException($"{gradeName}{sectionName}不存在!");
         student.ChangeSection(section);
         student.ChangeGrade(grade);
     }
@@ -95,13 +104,13 @@ public class StudentDomainService
     /// </summary>
     /// <param name="studentId"></param>
     /// <returns></returns>
-    public async Task<Student> FindStudentByIdAsync(string studentId) => await _repository.FindByStudentIdAsync(studentId);
+    public async Task<Student?> FindStudentByIdAsync(string studentId) => await _repository.FindByStudentIdAsync(studentId);
 
     /// <summary>
     /// 根据名称查找年级
     /// </summary>
     /// <param name="gradeName"></param>
     /// <returns></returns>
-    public async Task<Grade> FindGradeByNameAsync(string gradeName) => await _repository.FindGradeByNameAsync(gradeName);
+    public async Task<Grade?> FindGradeByNameAsync(string gradeName) => await _repository.FindGradeByNameAsync(gradeName);
 
 }
