@@ -1,21 +1,15 @@
 using Commons;
-using Microsoft.EntityFrameworkCore;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using StudentService.Domain;
 using StudentService.Domain.Entities;
 using StudentService.Infrastructure;
-using Zack.Commons;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddLogging();
-var assemblies = ReflectionHelper.GetAllReferencedAssemblies();
-builder.Services.RunModuleInitializers(assemblies);
-builder.Services.AddFluentValidationAutoValidation();
+builder.ConfigureExtraServices();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<StudentDbContext>(
-    opt => opt.UseNpgsql("Host=localhost;Database=Student;Username=postgres;Persist Security Info=True;Password=postgre123456")
-);
+builder.Services.AddSwaggerGen(c=>{
+    c.SwaggerDoc("v1", new() { Title = "StudentDemo.WebAPI", Version = "v1" });
+});
 
 var app = builder.Build();
 
@@ -27,19 +21,27 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("AddSection", async (StudentDomainService service, string sectionName, string gradeName) =>
+app.MapPost("AddSection", async (StudentDomainService service, AddSectionReq req) =>
 {
-    await service.AddGradeAndSectionAsync(sectionName, gradeName);
+    try
+    {
+        await service.AddGradeAndSectionAsync(req);
+        return Results.Ok("班级添加成功!");
+    }
+    catch (System.Exception ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
 })
 .WithMetadata(new UnitOfWorkAttribute(typeof(StudentDbContext)))
-.AddEndpointFilter<UnitOfWorkEndpointFilter>();
-
+.AddEndpointFilter<UnitOfWorkEndpointFilter>()
+.AddFluentValidationAutoValidation();
 
 app.MapPost("AddStudent", async (StudentDomainService service, AddStudentReq req) =>
 {
     try
     {
-        await service.SetionAddStudentAsync(req);
+         await service.SetionAddStudentAsync(req);
         return Results.Ok("学生添加成功!");
     }
     catch (System.Exception ex)
@@ -53,20 +55,40 @@ app.MapPost("AddStudent", async (StudentDomainService service, AddStudentReq req
 
 app.MapPost("ChangeSection", async (StudentDomainService service, ChangeSectionReq req) =>
 {
-    await service.StudentChangeSectionAsync(req);
+    try
+    {
+        await service.StudentChangeSectionAsync(req);
+        return Results.Ok("学生调班成功!");
+    }
+    catch (System.Exception ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
+
 })
 .WithMetadata(new UnitOfWorkAttribute(typeof(StudentDbContext)))
-.AddEndpointFilter<UnitOfWorkEndpointFilter>();
+.AddEndpointFilter<UnitOfWorkEndpointFilter>()
+.AddFluentValidationAutoValidation();
 
 app.MapPost("SectionHasStudent", async (StudentDomainService service, QueryStudentReq req) =>
 {
-    return await service.SectionExistStudentAsync(req);
-});
+    try
+    {
+        bool result = await service.SectionExistStudentAsync(req);
+        return Results.Ok(result);
+    }
+    catch (System.Exception ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
+})
+.AddFluentValidationAutoValidation();
 
 app.MapGet("Students/{studentId}", async (StudentDomainService service, string studentId) =>
 {
     return await service.FindStudentByIdAsync(studentId);
 });
 
+app.UseDefault();
 app.Urls.Add("http://*:5089");
 app.Run();

@@ -18,18 +18,18 @@ public class StudentDomainService
     /// <param name="sectionName"></param>
     /// <param name="gradeName"></param>
     /// <returns></returns>
-    public async Task AddGradeAndSectionAsync(string sectionName, string gradeName)
+    public async Task AddGradeAndSectionAsync(AddSectionReq req)
     {
-        Grade? grade = await _repository.FindGradeByNameAsync(gradeName);
+        Grade? grade = await _repository.FindGradeByNameAsync(req.GradeName);
         if (grade == null)
         {
-            grade = new Grade(gradeName);
+            grade = new Grade(req.GradeName);
             await _repository.AddGradeAsync(grade);
         }
-        Section? section = await _repository.FindSectionByNameAsync(sectionName, grade.GradeId);
+        Section? section = await _repository.FindSectionByNameAsync(req.SectionName, grade.GradeId);
         if (section == null)
         {
-            section = new Section(sectionName, grade);
+            section = new Section(req.SectionName, grade);
             await _repository.AddSectionAsync(section);
         }
         grade.AddSection(section);
