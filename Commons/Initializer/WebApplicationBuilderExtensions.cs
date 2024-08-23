@@ -51,23 +51,21 @@ public static class WebApplicationBuilderExtensions
         });
         //redis配置
         RedisConfig redisConfig = builder.Configuration.Get<RedisConfig>();
-		var confOpt = new ConfigurationOptions
-		{
-			EndPoints = { { redisConfig.Host, int.Parse(redisConfig.Port) } },
-			Password = redisConfig.Password
-		};
-		builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(confOpt));
+        var confOpt = new ConfigurationOptions
+        {
+            EndPoints = { { redisConfig.Host, int.Parse(redisConfig.Port) } },
+            Password = redisConfig.Password
+        };
+        builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(confOpt));
         //日志配置
         builder.Services.AddLogging(builder =>
-            {
+        {
                 Log.Logger = new LoggerConfiguration()
                    // .MinimumLevel.Information().Enrich.FromLogContext()
                    .WriteTo.Console()
                    .CreateLogger();
                 builder.AddSerilog();
-            });
-
-
-
+        });
+       
     }
 }

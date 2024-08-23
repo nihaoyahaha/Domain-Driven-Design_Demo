@@ -8,6 +8,7 @@ public class ModuleInitializer : IModuleInitializer
     public void Initialize(IServiceCollection services)
     {
         services.AddScoped<StudentDomainService>();
+        services.AddScoped<IdentityDomainService>();
     }
 
 }
