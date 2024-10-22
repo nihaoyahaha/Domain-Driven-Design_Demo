@@ -19,6 +19,9 @@ public static class WebApplicationBuilderExtensions
         builder.Services.Configure<DatabaseConfig>(builder.Configuration.AddEnvironmentVariables("DB_").Build());
         builder.Services.Configure<RedisConfig>(builder.Configuration.AddEnvironmentVariables("redis_").Build());
         builder.Services.Configure<JWTOptions>(builder.Configuration.AddEnvironmentVariables("jwt_").Build());
+        builder.Services.Configure<CorsSettings>(builder.Configuration.AddEnvironmentVariables("Cors_").Build());
+
+
         //注册所有程序集中的服务
         var assemblies = ReflectionHelper.GetAllReferencedAssemblies();
         builder.Services.RunModuleInitializers(assemblies);
@@ -43,10 +46,10 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddFluentValidationAutoValidation();
         //跨域配置
         builder.Services.AddCors(options =>
-        {
-            //var corsOpt = builder.Configuration.Get<CorsSettings>();
-            //string[] urls = corsOpt.Origins;
-            options.AddDefaultPolicy(builder => builder//.WithOrigins(urls)
+		{
+			var corsOpt = builder.Configuration.Get<CorsSettings>();
+            string[] urls = corsOpt.Origins.Split(',');
+            options.AddDefaultPolicy(builder => builder.WithOrigins(urls)
                     .AllowAnyMethod().AllowAnyHeader().AllowCredentials());
         });
         //redis配置

@@ -7,6 +7,7 @@ namespace Commons;
         public static IApplicationBuilder UseDefault(this IApplicationBuilder app)
         {
             app.UseCors();
+            app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseForwardedHeaders();
             app.UseAuthentication();
             app.UseAuthorization();
