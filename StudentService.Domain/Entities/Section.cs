@@ -27,33 +27,21 @@ public class Section
         SectionId = HashHelper.ComputeSha256Hash($"{name}{grade.Name}").Substring(0,8);
     }
 
-    /// <summary>
-    /// 班级内增加学生
-    /// </summary>
-    /// <param name="student"></param>
-    public void AddStudent(Student student)
-    {
-         Students.Add(student);
-    }
+	/// <summary>
+	/// 班级内增加学生
+	/// </summary>
+	/// <param name="student"></param>
+	public void AddStudent(Student student) => Students.Add(student);
 
-    /// <summary>
-    /// 班级内删除学生
-    /// </summary>
-    /// <param name="student"></param>
-    public void RemoveStudent(Student student)
-    {
-        Students.Remove(student);
-    }
+	/// <summary>
+	/// 班级内删除学生
+	/// </summary>
+	/// <param name="student"></param>
+	public void RemoveStudent(Student student) => Students.Remove(student);
 
-    /// <summary>
-    /// 获取该班级内的学生
-    /// </summary>
-    /// <returns></returns>
-    public List<Student> GetStudents()
-    {
-        return Students;
-    }
-
-
-
+	/// <summary>
+	/// 获取该班级内的学生
+	/// </summary>
+	/// <returns></returns>
+	public List<Student> GetStudents() => Students;
 }

@@ -8,10 +8,10 @@ public class StudentDbContext:IdentityDbContext<User,StudentService.Domain.Role,
 {
     public DbSet<Student> students{ get;private set; }
     public DbSet<Section> sections{ get;private set; }
-    public DbSet<Grade> grades{ get;private set; }
+	public DbSet<Grade> grades { get; private set; }
 
-    public StudentDbContext(DbContextOptions options):base(options)   
-    {
+	public StudentDbContext(DbContextOptions options) : base(options)
+	{
 
     }
 

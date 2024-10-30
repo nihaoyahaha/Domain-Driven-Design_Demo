@@ -4,8 +4,5 @@ namespace StudentService.Domain;
 
 public class Role :IdentityRole<Guid>
 {
-    public Role()
-    {
-        this.Id = Guid.NewGuid();
-    }
+	public Role() => Id = Guid.NewGuid();
 }

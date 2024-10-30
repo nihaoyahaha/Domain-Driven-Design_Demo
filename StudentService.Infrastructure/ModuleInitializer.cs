@@ -11,6 +11,8 @@ public class ModuleInitializer : IModuleInitializer
     {
         services.AddScoped<IStudentRepository,StudentRepository>();
         services.AddScoped<IIdentityRepository, IdentityRepository>();
-    }
+		services.AddScoped<StudentDomainService>();
+		services.AddScoped<IdentityDomainService>();
+	}
 
 }
