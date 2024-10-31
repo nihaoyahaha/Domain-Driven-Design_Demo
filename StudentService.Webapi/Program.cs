@@ -1,13 +1,14 @@
 using Commons;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.OpenApi.Models;
 using Serilog;
-using Serilog.Events;
 using Serilog.Formatting.Compact;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using StackExchange.Redis;
 using StudentService.Domain;
 using StudentService.Domain.Entities;
 using StudentService.Infrastructure;
+using System.Reflection;
 
 //serilog阶段1初始化,创建引导记录器
 Log.Logger = new LoggerConfiguration()
@@ -32,9 +33,12 @@ try
 	builder.Services.AddHttpContextAccessor();
 	builder.ConfigureExtraServices();
 	builder.Services.AddEndpointsApiExplorer();
-	builder.Services.AddSwaggerGen(c =>
+	builder.Services.AddSwaggerGen(options =>
 	{
-		c.SwaggerDoc("v1", new() { Title = "StudentDemo.WebAPI", Version = "v1" });
+		options.SwaggerDoc("v1", new() {
+			Version = "v1",
+			Title = "DDD-StudentDemo.WebAPI",
+		});
 	});
 	//配置Identity
 	builder.Services.AddDataProtection();
@@ -108,14 +112,12 @@ try
 
 	app.MapGet("Students/{studentId}", async (ILogger<Program> log, IConnectionMultiplexer rdb, StudentDomainService service, string studentId) =>
 	{
-		throw new ArgumentException("error test");
 		return await service.FindStudentByIdAsync(studentId);
 	});
 
 	app.UseDefault();
 	app.Urls.Add("http://*:5089");
 	app.Run();
-	throw new NotImplementedException();
 }
 catch (System.Exception ex)
 {
@@ -123,5 +125,5 @@ catch (System.Exception ex)
 }
 finally
 {
-	Log.CloseAndFlush();
+	await Log.CloseAndFlushAsync();
 }
