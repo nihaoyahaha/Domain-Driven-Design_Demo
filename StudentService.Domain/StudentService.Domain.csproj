@@ -3,7 +3,7 @@
     <ProjectReference Include="..\Commons\Commons.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="IServices\" />
+    <Folder Include="Services\" />
     <Folder Include="IRepositories\" />
   </ItemGroup>
   <PropertyGroup>

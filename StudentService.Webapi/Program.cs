@@ -8,14 +8,15 @@ using StackExchange.Redis;
 using StudentService.Domain;
 using StudentService.Domain.Entities;
 using StudentService.Infrastructure;
+
 //阶段1初始化,创建引导记录器
 Log.Logger = new LoggerConfiguration()
-	.MinimumLevel.Debug()
+	.MinimumLevel.Verbose()
 	.Enrich.FromLogContext()
 	.WriteTo.Console()
 	.WriteTo.File(
 			new RenderedCompactJsonFormatter(),
-			 Path.Combine("logs", "log-.json"), // 本地文件路径，包含日期
+			 Path.Combine("Logs/BootstrapLogs", "bootstrap-log-.json"),
 			rollingInterval: RollingInterval.Hour,
 			fileSizeLimitBytes: 5 * 1024 * 1024,
 			retainedFileCountLimit: 10,
@@ -105,16 +106,16 @@ try
 	})
 	.AddFluentValidationAutoValidation();
 
-	app.MapGet("Students/{studentId}", async ( IDiagnosticContext _diagnosticContext, IConnectionMultiplexer rdb, StudentDomainService service, string studentId) =>
+	app.MapGet("Students/{studentId}", async (ILogger<Program> log, IConnectionMultiplexer rdb, StudentDomainService service, string studentId) =>
 	{
-		
-
+		throw new ArgumentException("error test");
 		return await service.FindStudentByIdAsync(studentId);
 	});
 
 	app.UseDefault();
 	app.Urls.Add("http://*:5089");
 	app.Run();
+	throw new NotImplementedException();
 }
 catch (System.Exception ex)
 {

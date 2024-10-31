@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
+    <PackageReference Include="Serilog.Sinks.Map" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.1" />
     <PackageReference Include="Zack.Commons" Version="1.1.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.20" />
