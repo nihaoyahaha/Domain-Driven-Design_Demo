@@ -67,7 +67,7 @@ public static class WebApplicationBuilderExtensions
 		};
 		builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(confOpt));
 
-		//阶段2初始化,配置最终的记录器,日志过滤，根据级别写入不同文件
+		//serilog阶段2初始化,配置最终的记录器,日志过滤，根据级别写入不同文件
 		builder.Services.AddSerilog((services, lc) => lc
 		.MinimumLevel.Verbose()
 		.ReadFrom.Configuration(builder.Configuration)

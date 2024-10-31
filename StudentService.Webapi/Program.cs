@@ -9,7 +9,7 @@ using StudentService.Domain;
 using StudentService.Domain.Entities;
 using StudentService.Infrastructure;
 
-//阶段1初始化,创建引导记录器
+//serilog阶段1初始化,创建引导记录器
 Log.Logger = new LoggerConfiguration()
 	.MinimumLevel.Verbose()
 	.Enrich.FromLogContext()
