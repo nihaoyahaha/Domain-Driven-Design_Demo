@@ -11,12 +11,11 @@ public class StudentConfig : IEntityTypeConfiguration<Student>
        builder.ToTable("T_Students");
        builder.HasKey(x => x.StudentId);
 
-       builder.HasIndex(x=> new {x.Name,x.SectionId});
+       builder.HasIndex(x=> new { x.Name });
 
        builder.Property(x=>x.StudentId)
        .IsUnicode()
-       .HasComment("学号")
-       .HasColumnType("varchar(8)");
+       .HasComment("学号");
 
        builder.Property(x=>x.Name)
        .HasComment("学生姓名")
@@ -28,15 +27,12 @@ public class StudentConfig : IEntityTypeConfiguration<Student>
        .HasComment("出生日期")
        .HasColumnType("timestamp");
 
-       builder.Property(x=>x.SectionId)
-       .HasMaxLength(8)
-       .HasComment("班级ID(外键)");
+        builder.Property(x => x.Gender)
+            .HasMaxLength(20)
+            .IsUnicode(false)
+            .HasConversion<string>()
+            .HasComment("性别");
 
-       builder.HasOne(x=>x.Section)
-       .WithMany(x => x.Students)
-       .HasForeignKey(x=>x.SectionId);
-
-       builder.HasOne(x=>x.Grade).WithMany();
     }
 
 }

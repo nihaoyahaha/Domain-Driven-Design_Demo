@@ -1,71 +1,47 @@
-using Commons;
 
 namespace StudentService.Domain.Entities;
 
-/// <summary>
-/// 年级
-/// </summary>
 public class Grade
 {
-    /// <summary>
-    /// 年级编号
-    /// </summary>
-    public string GradeId{get;init;}
+    public int GradeId{ get; set;}
 
-    /// <summary>
-    /// 年级名称
-    /// </summary>
-    public string Name { get; init; }
+    public string Name { get; set; }
 
-    /// <summary>
-    /// 班级
-    /// </summary>
-    public List<Section> Sections { get; private set; }=new List<Section>();
+	public List<Section> Sections { get; set; } = new List<Section>();
 
-    private Grade()
-    {
-        
-    }
+    private Grade() { }
 
-    public Grade(string name)
-    {
-        Name = name;
-        GradeId =HashHelper.ComputeSha256Hash(name).Substring(0,8);
-    }
+    public Grade(string name) => Name = name;
 
-    /// <summary>
-    /// 添加班级
-    /// </summary>
-    /// <param name="section"></param>
-    public void AddSection(Section section)
-    {
-        Sections.Add(section); 
-    }
+    public void AddSection(Section section) => Sections.Add(section); 
 
-    /// <summary>
-    /// 删除班级
-    /// </summary>
-    public void RemoveSection(Section section)
-    {
-        if(section.Students.Count > 0)
-        {
-            throw new ArgumentException("不可删除该班级，班级内还有学生");
-        }
-        Sections.Remove(section);
-    }
-
-    /// <summary>
-    /// 获取班级
-    /// </summary>
-    /// <param name="sectionName"></param>
-    /// <returns></returns>
-    public Section? FindSectionByName(string sectionName) => Sections.FirstOrDefault(s=>s.Name == sectionName && s.GradeId ==GradeId);
+    public void AddSections(List<Section> sections) => Sections.AddRange(sections);
     
-    /// <summary>
-    /// 该年级学生总数
-    /// </summary>
-    /// <returns></returns>
-    public int GetStudentsCount() => Sections.SelectMany(x=>x.Students).ToList().Count();
+    public void RemoveSection(int sectionId) => Sections.RemoveAll(x=>x.SectionId == sectionId);
 
+    public void RemoveSections(int[] sectionIds) => Sections.RemoveAll(x=> sectionIds.Contains(x.SectionId));
+
+    public Section FindSectionById(int sectionId) => Sections.Single(s=> s.SectionId == sectionId);
+
+    public List<Section> GetSections() => Sections;
+
+    public bool IsExistSectionBySectionId(int sectionId) => Sections.Any(x => x.SectionId == sectionId);
+
+    public bool IsExistSectionBySectionName(string sectionName) => Sections.Any(x => x.Name == sectionName);
+
+    public bool IsExistStudentBySectionIdAndStudentId(int sectionId, int studentId) =>
+        Sections.Single(x => x.SectionId == sectionId).IsExistStudentByStudentId(studentId);
+
+	public bool IsExistStudentBySectionIdAndStudentName(int sectionId, string studentName) =>
+	    Sections.Single(x => x.SectionId == sectionId).IsExistStudentByStudentName(studentName);
+
+	public List<Student>? GetStudentsBySectionId(int sectionId) => 
+        Sections.Single(x => x.SectionId == sectionId).Students;
+
+	public int StudentCountBySectionId(int sectionId) => 
+        Sections.Single(x=>x.SectionId == sectionId).Students.Count();
+
+    public int StudentsCount() =>
+        Sections.SelectMany(x => x.Students).Count();
 
 }

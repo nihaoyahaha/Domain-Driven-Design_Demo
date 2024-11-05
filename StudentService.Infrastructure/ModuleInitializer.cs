@@ -1,7 +1,6 @@
 using Commons;
 using Microsoft.Extensions.DependencyInjection;
 using StudentService.Domain;
-using Zack.Commons;
 
 namespace StudentService.Infrastructure;
 

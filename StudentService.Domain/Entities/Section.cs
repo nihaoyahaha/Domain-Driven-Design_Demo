@@ -1,47 +1,34 @@
-using Commons;
 
 namespace StudentService.Domain.Entities;
 
-/// <summary>
-/// 班级
-/// </summary>
 public class Section
 {
-    /// <summary>
-    /// 班级Id
-    /// </summary>
-    public string SectionId { get; init; }
-    public string Name { get; init; }
-    public List<Student> Students { get; private set; } = new List<Student>();
-    public Grade Grade { get; init; }
-    public string GradeId { get; private set; }
+    public int SectionId { get; set; }
+    public string Name { get; set; }
+    public List<Student> Students { get; set; } = new List<Student>();
+    
+    public int GradeId { get; set; }
+	public Grade Grade { get; set; }
+	private Section() { }
 
-    private Section()
-    {
-        
-    }
-    public Section(string name, Grade grade)
-    {
-        Name = name;
-        Grade = grade;
-        SectionId = HashHelper.ComputeSha256Hash($"{name}{grade.Name}").Substring(0,8);
-    }
+    public Section(string name) => Name = name;
 
-	/// <summary>
-	/// 班级内增加学生
-	/// </summary>
-	/// <param name="student"></param>
-	public void AddStudent(Student student) => Students.Add(student);
+    public bool IsExistStudentByStudentId(int studentId) => Students.Any(x => x.StudentId == studentId);
 
-	/// <summary>
-	/// 班级内删除学生
-	/// </summary>
-	/// <param name="student"></param>
-	public void RemoveStudent(Student student) => Students.Remove(student);
+    public bool IsExistStudentByStudentName(string studentName) => Students.Any(x => x.Name == studentName);
 
-	/// <summary>
-	/// 获取该班级内的学生
-	/// </summary>
-	/// <returns></returns>
-	public List<Student> GetStudents() => Students;
+    public int RemoveStudent(int studentId) => Students.RemoveAll(x=>x.StudentId == studentId);
+
+    public int RemoveStudents(int[] studentIds) => Students.RemoveAll(x=> studentIds.Contains(x.StudentId));
+
+    public List<Student> GetStudents() => Students;
+
+    public Student FindStudentByStudentId(int studentId) => Students.Single(x => x.StudentId == studentId);
+
+    public Student FindStudentByStudentName(string studentName) => Students.Single(x => x.Name == studentName);
+
+    public int StudentsCount() => Students.Count();
+
+    public int StudentsCountByGender(Gender gender) => Students.Count(x => x.Gender == gender);
+
 }

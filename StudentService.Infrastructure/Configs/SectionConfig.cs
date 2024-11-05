@@ -10,9 +10,6 @@ public class SectionConfig : IEntityTypeConfiguration<Section>
     {
         builder.ToTable("T_Sections");
         builder.HasKey(x => x.SectionId);
-        builder.Property(x => x.SectionId)
-        .HasMaxLength(8)
-        .HasColumnType("varchar");
 
         builder.HasIndex(x=>new {x.Name});
         builder.Property(x=>x.Name)
@@ -21,13 +18,10 @@ public class SectionConfig : IEntityTypeConfiguration<Section>
         .HasColumnType("varchar(20)")
         .IsRequired();
 
-        builder.Property(x=>x.GradeId)
-        .HasColumnType("varchar(8)")
-        .HasComment("班级Id(外键)");
-
-        builder.HasOne(x => x.Grade)
-        .WithMany(x=>x.Sections)
-        .HasForeignKey(x=>x.GradeId);
+        builder.HasMany(x => x.Students)
+        .WithOne(x=>x.Section)
+        .HasForeignKey(x=>x.SectionId)
+        .IsRequired();
     }
 
 }

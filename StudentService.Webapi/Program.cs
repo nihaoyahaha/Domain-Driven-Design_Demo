@@ -1,5 +1,6 @@
 using Commons;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -7,8 +8,10 @@ using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using StackExchange.Redis;
 using StudentService.Domain;
 using StudentService.Domain.Entities;
+using StudentService.Domain.RequestDtos;
 using StudentService.Infrastructure;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 //serilog阶段1初始化,创建引导记录器
 Log.Logger = new LoggerConfiguration()
@@ -30,6 +33,7 @@ try
 {
 	Log.Information("Starting web application");
 	var builder = WebApplication.CreateBuilder(args);
+	builder.Services.AddOpenApiDocument();
 	builder.Services.AddHttpContextAccessor();
 	builder.ConfigureExtraServices();
 	builder.Services.AddEndpointsApiExplorer();
@@ -40,6 +44,8 @@ try
 			Title = "DDD-StudentDemo.WebAPI",
 		});
 	});
+	
+
 	//配置Identity
 	builder.Services.AddDataProtection();
 	builder.Services.AddIdentityCore<User>(opt =>
@@ -72,47 +78,43 @@ try
 	{
 		app.UseSwagger();
 		app.UseSwaggerUI();
+		app.UseOpenApi();
+		app.UseReDoc(options =>
+		{
+			options.Path = "/redoc";
+		});
 	}
 
 	app.UseHttpsRedirection();
 
-	app.MapPost("AddSection", async (StudentDomainService service, AddSectionReq req) =>
-	{
-		await service.AddGradeAndSectionAsync(req);
-		return Results.Ok("班级添加成功!");
-	})
-	.WithMetadata(new UnitOfWorkAttribute(typeof(StudentDbContext)))
-	.AddEndpointFilter<UnitOfWorkEndpointFilter>()
-	.AddFluentValidationAutoValidation();
+	var endpoints = app.MapGroup("Student")
+		.AddEndpointFilter<UnitOfWorkEndpointFilter>()
+		.AddFluentValidationAutoValidation()
+		.WithMetadata(new UnitOfWorkAttribute(typeof(StudentDbContext)));
 
-	app.MapPost("AddStudent", async (StudentDomainService service, AddStudentReq req) =>
+	endpoints.MapPost("InitGradeAndSection", async (StudentDomainService service) =>
 	{
-		await service.SetionAddStudentAsync(req);
+		await service.InitGradeAndSection();
+		return Results.Ok("年级班级添加成功!");
+	});
+
+	app.MapGet("Grades", async (StudentDomainService service) =>
+	{
+		var grades = await service.FindGradesAsync();
+		return Results.Ok(grades);
+	});
+
+	app.MapGet("Grades/{gradeName}", async (string gradeName, StudentDomainService service) =>
+	{
+		var grades = await service.FindGradeByGradeNameAsync(gradeName);
+		return Results.Ok(grades);
+	})
+   .AddFluentValidationAutoValidation();
+
+	endpoints.MapPost("AddStudents", async (StudentDomainService service, InsertStudentsDto dto) =>
+	{
+		await service.AddStudentAsync(dto);
 		return Results.Ok("学生添加成功!");
-	})
-	.WithMetadata(new UnitOfWorkAttribute(typeof(StudentDbContext)))
-	.AddEndpointFilter<UnitOfWorkEndpointFilter>()
-	.AddFluentValidationAutoValidation();
-
-	app.MapPost("ChangeSection", async (StudentDomainService service, ChangeSectionReq req) =>
-	{
-		await service.StudentChangeSectionAsync(req);
-		return Results.Ok("学生调班成功!");
-	})
-	.WithMetadata(new UnitOfWorkAttribute(typeof(StudentDbContext)))
-	.AddEndpointFilter<UnitOfWorkEndpointFilter>()
-	.AddFluentValidationAutoValidation();
-
-	app.MapPost("SectionHasStudent", async (StudentDomainService service, QueryStudentReq req) =>
-	{
-		bool result = await service.SectionExistStudentAsync(req);
-		return Results.Ok(result);
-	})
-	.AddFluentValidationAutoValidation();
-
-	app.MapGet("Students/{studentId}", async (ILogger<Program> log, IConnectionMultiplexer rdb, StudentDomainService service, string studentId) =>
-	{
-		return await service.FindStudentByIdAsync(studentId);
 	});
 
 	app.UseDefault();

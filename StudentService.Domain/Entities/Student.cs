@@ -1,60 +1,30 @@
-using Commons;
-using Microsoft.Win32.SafeHandles;
 
 namespace StudentService.Domain.Entities;
 
 public class Student
 {
-    /// <summary>
-    /// 学号
-    /// </summary>
-    public string StudentId{get;init;}
+    public int StudentId{ get; set;}
 
-    public string Name { get; init; }
+    public string Name { get; set; }
     
-    /// <summary>
-    /// 出生日期
-    /// </summary>
-    public DateTime Birthday { get; init; }
+    public DateTime Birthday { get; set; }
 
-    /// <summary>
-    /// 班级
-    /// </summary>
-    public Section Section { get; private set; }
+    public Gender Gender { get; set; }
+
+	public Section Section { get; set; }
     
-    /// <summary>
-    /// 班级外键
-    /// </summary>
-    public string SectionId{get;private set;}
-
-    /// <summary>
-    /// 年级
-    /// </summary>
-    public Grade Grade { get; private set; }
+    public int SectionId{ get; set;}
     
-    private Student(){
+    private Student() { }
 
-    }
-
-    public Student(string name, DateTime birthday, Section section, Grade grade)
+    public Student(string name, DateTime birthday,Gender gender )
     {
-        StudentId = Guid.NewGuid().ToString().Substring(0,8);
         Name = name;
         Birthday = birthday;
-        Section = section;
-        Grade = grade;
+        Gender = gender;
+        
     }
 
-    /// <summary>
-    /// 更换班级
-    /// </summary>
-    /// <param name="section"></param>
-    public void ChangeSection(Section section) => Section = section;
-
-    /// <summary>
-    /// 更换年级
-    /// </summary>
-    /// <param name="grade"></param>
-    public void ChangeGrade(Grade grade) => Grade = grade;
+    public void ChangeSection(int sectionId) => SectionId = sectionId;
 
 }

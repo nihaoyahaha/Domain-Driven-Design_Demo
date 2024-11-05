@@ -7,13 +7,26 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace StudentService.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class addIdentity : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "T_Role",
+                name: "T_Grades",
+                columns: table => new
+                {
+                    GradeId = table.Column<int>(type: "integer", nullable: false, comment: "年级ID")
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "varchar(20)", nullable: false, comment: "年级名称")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_Grades", x => x.GradeId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_Roles",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -23,7 +36,7 @@ namespace StudentService.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_T_Role", x => x.Id);
+                    table.PrimaryKey("PK_T_Roles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -55,6 +68,26 @@ namespace StudentService.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "T_Sections",
+                columns: table => new
+                {
+                    SectionId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "varchar(20)", nullable: false, comment: "班级名称"),
+                    GradeId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_Sections", x => x.SectionId);
+                    table.ForeignKey(
+                        name: "FK_T_Sections_T_Grades_GradeId",
+                        column: x => x.GradeId,
+                        principalTable: "T_Grades",
+                        principalColumn: "GradeId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -68,9 +101,9 @@ namespace StudentService.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AspNetRoleClaims_T_Role_RoleId",
+                        name: "FK_AspNetRoleClaims_T_Roles_RoleId",
                         column: x => x.RoleId,
-                        principalTable: "T_Role",
+                        principalTable: "T_Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -127,9 +160,9 @@ namespace StudentService.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
                     table.ForeignKey(
-                        name: "FK_AspNetUserRoles_T_Role_RoleId",
+                        name: "FK_AspNetUserRoles_T_Roles_RoleId",
                         column: x => x.RoleId,
-                        principalTable: "T_Role",
+                        principalTable: "T_Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -160,6 +193,28 @@ namespace StudentService.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "T_Students",
+                columns: table => new
+                {
+                    StudentId = table.Column<int>(type: "integer", nullable: false, comment: "学号")
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "varchar(20)", nullable: false, comment: "学生姓名"),
+                    Birthday = table.Column<DateTime>(type: "timestamp", nullable: false, comment: "出生日期"),
+                    Gender = table.Column<string>(type: "character varying(20)", unicode: false, maxLength: 20, nullable: false, comment: "性别"),
+                    SectionId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_Students", x => x.StudentId);
+                    table.ForeignKey(
+                        name: "FK_T_Students_T_Sections_SectionId",
+                        column: x => x.SectionId,
+                        principalTable: "T_Sections",
+                        principalColumn: "SectionId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -181,10 +236,35 @@ namespace StudentService.Infrastructure.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_T_Grades_Name",
+                table: "T_Grades",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
-                table: "T_Role",
+                table: "T_Roles",
                 column: "NormalizedName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_Sections_GradeId",
+                table: "T_Sections",
+                column: "GradeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_Sections_Name",
+                table: "T_Sections",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_Students_Name",
+                table: "T_Students",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_Students_SectionId",
+                table: "T_Students",
+                column: "SectionId");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
@@ -217,10 +297,19 @@ namespace StudentService.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "T_Role");
+                name: "T_Students");
+
+            migrationBuilder.DropTable(
+                name: "T_Roles");
 
             migrationBuilder.DropTable(
                 name: "T_Users");
+
+            migrationBuilder.DropTable(
+                name: "T_Sections");
+
+            migrationBuilder.DropTable(
+                name: "T_Grades");
         }
     }
 }

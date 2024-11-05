@@ -12,15 +12,15 @@ using StudentService.Infrastructure;
 namespace StudentService.Infrastructure.Migrations
 {
     [DbContext(typeof(StudentDbContext))]
-    [Migration("20240823063019_addIdentity")]
-    partial class addIdentity
+    [Migration("20241101093648_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.20")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -130,9 +130,12 @@ namespace StudentService.Infrastructure.Migrations
 
             modelBuilder.Entity("StudentService.Domain.Entities.Grade", b =>
                 {
-                    b.Property<string>("GradeId")
-                        .HasColumnType("varchar(8)")
+                    b.Property<int>("GradeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
                         .HasComment("年级ID");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("GradeId"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -149,14 +152,14 @@ namespace StudentService.Infrastructure.Migrations
 
             modelBuilder.Entity("StudentService.Domain.Entities.Section", b =>
                 {
-                    b.Property<string>("SectionId")
-                        .HasMaxLength(8)
-                        .HasColumnType("varchar");
+                    b.Property<int>("SectionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
 
-                    b.Property<string>("GradeId")
-                        .IsRequired()
-                        .HasColumnType("varchar(8)")
-                        .HasComment("班级Id(外键)");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SectionId"));
+
+                    b.Property<int>("GradeId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -175,18 +178,24 @@ namespace StudentService.Infrastructure.Migrations
 
             modelBuilder.Entity("StudentService.Domain.Entities.Student", b =>
                 {
-                    b.Property<string>("StudentId")
+                    b.Property<int>("StudentId")
+                        .ValueGeneratedOnAdd()
                         .IsUnicode(true)
-                        .HasColumnType("varchar(8)")
+                        .HasColumnType("integer")
                         .HasComment("学号");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("StudentId"));
 
                     b.Property<DateTime>("Birthday")
                         .HasColumnType("timestamp")
                         .HasComment("出生日期");
 
-                    b.Property<string>("GradeId")
+                    b.Property<string>("Gender")
                         .IsRequired()
-                        .HasColumnType("varchar(8)");
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("character varying(20)")
+                        .HasComment("性别");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -194,19 +203,14 @@ namespace StudentService.Infrastructure.Migrations
                         .HasColumnType("varchar(20)")
                         .HasComment("学生姓名");
 
-                    b.Property<string>("SectionId")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("varchar")
-                        .HasComment("班级ID(外键)");
+                    b.Property<int>("SectionId")
+                        .HasColumnType("integer");
 
                     b.HasKey("StudentId");
 
-                    b.HasIndex("GradeId");
+                    b.HasIndex("Name");
 
                     b.HasIndex("SectionId");
-
-                    b.HasIndex("Name", "SectionId");
 
                     b.ToTable("T_Students", (string)null);
                 });
@@ -309,7 +313,7 @@ namespace StudentService.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("T_Role", (string)null);
+                    b.ToTable("T_Roles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -376,19 +380,11 @@ namespace StudentService.Infrastructure.Migrations
 
             modelBuilder.Entity("StudentService.Domain.Entities.Student", b =>
                 {
-                    b.HasOne("StudentService.Domain.Entities.Grade", "Grade")
-                        .WithMany()
-                        .HasForeignKey("GradeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("StudentService.Domain.Entities.Section", "Section")
                         .WithMany("Students")
                         .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Grade");
 
                     b.Navigation("Section");
                 });

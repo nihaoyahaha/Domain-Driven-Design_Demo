@@ -10,7 +10,8 @@ using Serilog.Formatting.Compact;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using StackExchange.Redis;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using Zack.Commons;
+using System.Text.Json.Serialization;
+
 
 namespace Commons;
 
@@ -24,10 +25,12 @@ public static class WebApplicationBuilderExtensions
 		builder.Services.Configure<JWTOptions>(builder.Configuration.AddEnvironmentVariables("jwt_").Build());
 		builder.Services.Configure<CorsSettings>(builder.Configuration.AddEnvironmentVariables("Cors_").Build());
 
-		//注册所有程序集中的服务
-		var assemblies = ReflectionHelper.GetAllReferencedAssemblies();
-		builder.Services.RunModuleInitializers(assemblies);
+		//解决序列化对象循环引用，常发生在efcore使用inclue命令
+		builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+		options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
 		//注册所有DbContext
+		var assemblies = ReflectionHelper.GetAllReferencedAssemblies();
 		builder.Services.AddAllDbContexts(ctx =>
 		{
 			DatabaseConfig dbConf = builder.Configuration.Get<DatabaseConfig>();
@@ -35,6 +38,8 @@ public static class WebApplicationBuilderExtensions
 			//string connStr ="Host=localhost;Database=Student;Username=postgres;Persist Security Info=True;Password=postgre123456";
 			ctx.UseNpgsql(connStr);
 		}, assemblies);
+
+		builder.Services.RunModuleInitializers(assemblies);
 
 		//身份认证和swagger配置
 		builder.Services.AddAuthorization();

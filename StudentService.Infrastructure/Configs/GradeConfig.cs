@@ -12,13 +12,16 @@ public class GradeConfig : IEntityTypeConfiguration<Grade>
         builder.HasIndex(x => x.Name);
         builder.HasKey(x => x.GradeId);
         builder.Property(x => x.GradeId)
-        .HasColumnType("varchar(8)")
         .HasComment("年级ID");
 
         builder.Property(x => x.Name)
         .IsUnicode()
         .HasColumnType("varchar(20)")
         .HasComment("年级名称");
-    }
 
+        builder.HasMany(x => x.Sections)
+            .WithOne(x => x.Grade)
+            .HasForeignKey(x=>x.GradeId)
+            .IsRequired();
+    }
 }

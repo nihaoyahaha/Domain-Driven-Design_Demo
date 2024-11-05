@@ -1,8 +1,12 @@
 using Commons.CustomException;
+using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using StudentService.Domain;
 using StudentService.Domain.Entities;
+using System.Xml;
+using System.Xml.Linq;
+using static System.Collections.Specialized.BitVector32;
 
 namespace StudentService.Infrastructure;
 
@@ -14,39 +18,38 @@ public class StudentRepository : IStudentRepository
 
 	public async Task AddGradeAsync(Grade grade) => await _dbCtx.grades.AddAsync(grade);
 
-	public async Task AddSectionAsync(Section section) => await _dbCtx.sections.AddAsync(section);
+	public async Task<List<Grade>> FindAllGradesAndSectionsAsync() => 
+		await _dbCtx.grades.Include(x => x.Sections).ThenInclude(x=>x.Students). ToListAsync();
 
-	public async Task<List<Student>> FindBySectionAsync(string sectionName, string gradeName)
-    {
-        Grade? grade = await FindGradeByNameAsync(gradeName);
-        if (grade == null) throw new GradeNotFoundException($"不存在{gradeName}!");
-        Section? section = await FindSectionByNameAsync(sectionName,grade.GradeId);
-        if (section == null) throw new SectionNotFoundException($"{gradeName}{sectionName}不存在!");
-        return section.Students;
-    }
+	public async Task<bool> IsExistGradeByGradeNameAsync(string gradeName) => 
+		await _dbCtx.grades.AnyAsync(g=>g.Name == gradeName);
 
-	public async Task<Student?> FindByStudentIdAsync(string studentId) => await _dbCtx.FindAsync<Student>(studentId);
+	public async Task<bool> IsExistSectionByGradeNameAndSectionNameAsync(string gradeName, string sectionName)
+	{
+		var grade = await _dbCtx.grades.SingleAsync(g => g.Name == gradeName);
+		return await _dbCtx.sections.AnyAsync(section => section.GradeId == grade.GradeId && section.Name == sectionName);
+	}
 
-	public async Task<Grade?> FindGradeByNameAsync(string gradeName) => await _dbCtx.grades.Include(s => s.Sections).FirstOrDefaultAsync(x => x.Name == gradeName);
+	public async Task<dynamic> FindGradeByGradeNameAsync(string Name) =>
+		await _dbCtx.grades
+		.Include(x=>x.Sections)
+		.ThenInclude(x => x.Students)
+		.Select(x => new { 
+		    x.Name,
+			Sections = x.Sections.Select(s=> new { 
+				s.Name,
+				Students = s.Students.Select(stu => new {
+					stu.Name,
+					stu.Birthday,
+					Gender = stu.Gender == Gender.male ? "�j" : "��",
+				})
+			})})
+		.Select(x=> new { x.Name, x.Sections })
+		.SingleAsync(x=>x.Name == Name);
 
-	public async Task<Section?> FindSectionByNameAsync(string sectionName, string gradeId) => await _dbCtx.sections.Include(s => s.Students).FirstOrDefaultAsync(s => s.Name == sectionName && s.GradeId == gradeId);
+	public async Task<Domain.Entities.Section> FindSectionByGradeNameAndSectionNameAsync(int gradeId, string sectionName) =>
+		await _dbCtx.sections.Include(x => x.Students).SingleAsync(x => x.GradeId == gradeId && x.Name == sectionName);
 
-	public async Task<bool> IsExistStudent(string studentID, string sectionName, string gradeName)
-    {
-        Grade? grade = await FindGradeByNameAsync(gradeName);
-        if (grade == null) throw new GradeNotFoundException($"{gradeName}不存在!");
-        Section? section = await FindSectionByNameAsync(sectionName,grade.GradeId);
-        if (section == null) throw new SectionNotFoundException("{gradeName}{sectionName}不存在!");
-        return await _dbCtx.students.AnyAsync( x => x.StudentId == studentID && x.SectionId == section.SectionId && x.Grade ==grade) ;
-    }
-
-    public async Task RemoveStudentAsync(string studentId)
-    {
-        Student? student =await FindByStudentIdAsync(studentId);
-        if(student !=null)
-        {
-            _dbCtx.students.Remove(student);     
-        }    
-    }
+	public void DetectChanges() => _dbCtx.ChangeTracker.DetectChanges();
 
 }
