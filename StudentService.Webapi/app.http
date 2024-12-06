@@ -1,6 +1,28 @@
-@hostAddress = http://localhost:5089
+﻿@hostAddress = http://localhost:5089
 
-GET {{hostAddress}}/weatherforecast/
+GET {{hostAddress}}/Grades/
 Accept: application/json
 
 ###
+
+GET {{hostAddress}}/Grades/1年级
+Accept: application/json
+
+###
+
+GET http://nihaoyahaha.top:5216/StaticFiles/Images/1.jpg
+content-type:image/jpeg
+
+###
+POST https://login.microsoftonline.com/common/oauth2/v2.0/token
+Content-Type:application/x-www-form-urlencoded
+
+client_id=56fa83eb-7808-4097-bedd-aad033d516b6
+&scope=offline_access https://graph.microsoft.com/.default
+&code=M.C534_SN1.2.U.a8b45039-01d8-b854-09d1-be9942a9fcc0
+&redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient
+&grant_type=authorization_code
+
+
+###
+

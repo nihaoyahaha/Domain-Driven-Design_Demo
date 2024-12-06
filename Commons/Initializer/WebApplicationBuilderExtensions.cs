@@ -43,7 +43,8 @@ public static class WebApplicationBuilderExtensions
 
 		//身份认证和swagger配置
 		builder.Services.AddAuthorization();
-		builder.Services.AddAuthentication();
+		builder.Services.AddAuthentication()
+			;
 		JWTOptions jwtOpt = builder.Configuration.Get<JWTOptions>();
 		builder.Services.AddJWTAuthentication(jwtOpt);
 		builder.Services.Configure<SwaggerGenOptions>(c =>
