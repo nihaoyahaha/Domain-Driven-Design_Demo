@@ -44,7 +44,6 @@ public class StudentRepository : IStudentRepository
 					Gender = stu.Gender == Gender.male ? "’j" : "—",
 				})
 			})})
-		.Select(x=> new { x.Name, x.Sections })
 		.SingleAsync(x=>x.Name == Name);
 
 	public async Task<Domain.Entities.Section> FindSectionByGradeNameAndSectionNameAsync(int gradeId, string sectionName) =>
