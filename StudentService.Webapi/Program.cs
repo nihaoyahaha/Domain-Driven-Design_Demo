@@ -1,6 +1,7 @@
 using Commons;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -115,6 +116,10 @@ try
 	{
 		await service.AddStudentAsync(dto);
 		return Results.Ok("学生添加成功!");
+	});
+
+	app.MapGet("redisBloom", (IConnectionMultiplexer redis,IOptionsSnapshot<RedisConfig> snapshot) => {
+		ConnectionMultiplexer conMult = (ConnectionMultiplexer)redis;
 	});
 
 	app.UseDefault();
