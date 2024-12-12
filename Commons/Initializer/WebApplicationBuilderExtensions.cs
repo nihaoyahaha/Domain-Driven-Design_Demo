@@ -71,9 +71,14 @@ public static class WebApplicationBuilderExtensions
 			EndPoints = { { redisConfig.Host, int.Parse(redisConfig.Port) } },
 			Password = redisConfig.Password
 		};
-		//builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(confOpt));
+		builder.Services.AddKeyedSingleton<IConnectionMultiplexer>("redis",ConnectionMultiplexer.Connect(confOpt));
 
-		builder.Services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>();
+		confOpt = new ConfigurationOptions
+		{
+			EndPoints = { { redisConfig.Host, 6481 } },
+			Password = redisConfig.Password
+		};
+		builder.Services.AddKeyedSingleton<IConnectionMultiplexer>("redisBloom", ConnectionMultiplexer.Connect(confOpt));
 
 		//serilog阶段2初始化,配置最终的记录器,日志过滤，根据级别写入不同文件
 		builder.Services.AddSerilog((services, lc) => lc

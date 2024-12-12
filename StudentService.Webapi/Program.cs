@@ -118,8 +118,15 @@ try
 		return Results.Ok("学生添加成功!");
 	});
 
-	app.MapGet("redisBloom", (IConnectionMultiplexer redis,IOptionsSnapshot<RedisConfig> snapshot) => {
-		ConnectionMultiplexer conMult = (ConnectionMultiplexer)redis;
+
+	app.MapGet("redisBloom",async ([FromKeyedServices("redisBloom")] IConnectionMultiplexer redis) => {
+		var db0 = redis.GetDatabase();    
+		var Exists = await db0.BloomExistsAsync("user","zhang");     
+	});
+
+	app.MapGet("redis", async ([FromKeyedServices("redis")] IConnectionMultiplexer redis) => {
+		var db0 = redis.GetDatabase(0);
+		var value = await db0.StringGetAsync("k1");
 	});
 
 	app.UseDefault();

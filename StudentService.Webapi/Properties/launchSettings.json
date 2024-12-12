@@ -12,13 +12,13 @@
         "DB_DBUSERNAME": "postgres",
         "DB_DBPASSWORD": "gyg",
         "REDIS_PASSWORD": "gyg",
-        "REDIS_PORT": "6391",
+        "REDIS_PORT": "6381",
         "REDIS_HOST": "nihaoyahaha.top",
         "JWT_ExpireSeconds": "3600",
         "JWT_TokenSecret": "einsowear;jfhfsfmoeislakjeiapqweio@%*()!#&lnfwf",
         "JWT_Issuer": "nihaoyahaha.top",
         "JWT_Audience": "nihaoyahaha.top/api",
-        "Cors_Origins":  "http://localhost:5173,http://localhost:5174" 
+        "Cors_Origins": "http://localhost:5173,http://localhost:5174"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5089"
